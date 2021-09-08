@@ -7,6 +7,7 @@ const fs = require('fs');
 const url = require('url');
 const uuid = require('uuid/v4');
 const AWS = require('aws-sdk');
+const mime = require('mime-types')
 /* eslint-enable */
 
 let hostname = '127.0.0.1';
@@ -42,6 +43,7 @@ const server = require(protocol).createServer(
     log(`${request.method} ${request.url} BEGIN`);
     compression({})(request, response, () => {});
     try {
+      const requestUrl = url.parse(request.url, true);
       if (
         request.method === 'GET' &&
         (request.url === '/' ||
@@ -147,6 +149,15 @@ const server = require(protocol).createServer(
       } else if (request.method === 'POST' && request.url.startsWith('/logs')) {
         console.log('Received logs in the local server');
         response.end('Received logs in the local server');
+      }  else if (request.method === 'GET') {
+        const fileName = requestUrl.pathname.substring(1);
+        fs.access(fileName, (err) => {
+          if (!err) {
+            respond(response, 200, mime.lookup(fileName), fs.readFileSync(fileName));
+          } else {
+            respond(response, 404, 'text/html', '404 Not Found');
+          }
+        });
       } else {
         response.statusCode = 404;
         response.setHeader('Content-Type', 'text/plain');
@@ -162,6 +173,16 @@ const server = require(protocol).createServer(
     log(`${request.method} ${request.url} END`);
   }
 );
+
+function respond(response, statusCode, contentType, body, skipLogging = false) {
+  response.statusCode = statusCode;
+  response.setHeader('Content-Type', contentType);
+  response.setHeader('Access-Control-Allow-Origin', '*');
+  response.end(body);
+  if (contentType === 'application/json' && !skipLogging) {
+    log(body);
+  }
+}
 
 server.listen(port, hostname, () => {
   log(`server running at ${protocol}://${hostname}:${port}/`);
