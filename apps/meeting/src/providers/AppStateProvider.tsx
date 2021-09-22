@@ -1,7 +1,7 @@
 // Copyright 2020-2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-import React, { useContext, useState, ReactNode } from 'react';
+import React, { useContext, useState, ReactNode, useCallback } from 'react';
 import { MeetingMode } from '../types';
 
 type Props = {
@@ -14,9 +14,11 @@ interface AppStateValue {
   theme: string;
   region: string;
   isWebAudioEnabled: boolean;
+  isBackgroundBlurEnabled: boolean;
   meetingMode: MeetingMode;
   toggleTheme: () => void;
   toggleWebAudio: () => void;
+  toggleBackgroundBlur: () => void;
   setAppMeetingInfo: (meetingId: string, name: string, region: string) => void;
   setMeetingMode: (meetingMode: MeetingMode) => void;
 }
@@ -42,6 +44,7 @@ export function AppStateProvider({ children }: Props) {
   const [meetingMode, setMeetingMode] = useState(MeetingMode.Attendee);
   const [localUserName, setLocalName] = useState('');
   const [isWebAudioEnabled, setIsWebAudioEnabled] = useState(false);
+  const [isBackgroundBlurEnabled, setIsBackgroundBlurEnabled] = useState(false);
   const [theme, setTheme] = useState(() => {
     const storedTheme = localStorage.getItem('theme');
     return storedTheme || 'light';
@@ -61,6 +64,10 @@ export function AppStateProvider({ children }: Props) {
     setIsWebAudioEnabled(current => !current);
   }
 
+  const toggleBackgroundBlur = (): void  => {
+    setIsBackgroundBlurEnabled(current => !current);
+  }
+
   const setAppMeetingInfo = (
     meetingId: string,
     name: string,
@@ -76,10 +83,12 @@ export function AppStateProvider({ children }: Props) {
     localUserName,
     theme,
     isWebAudioEnabled,
+    isBackgroundBlurEnabled,
     region,
     meetingMode,
     toggleTheme,
     toggleWebAudio,
+    toggleBackgroundBlur,
     setAppMeetingInfo,
     setMeetingMode,
   };
