@@ -1,15 +1,17 @@
 // Copyright 2020-2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
+import { Device, VoiceFocusTransformDevice } from 'amazon-chime-sdk-js';
 import {
   lightTheme,
   MeetingProvider,
   NotificationProvider,
   darkTheme,
   GlobalStyles,
+  useVoiceFocus,
   VoiceFocusProvider,
 } from 'amazon-chime-sdk-component-library-react';
 
@@ -31,24 +33,7 @@ const App: FC = () => (
           <Notifications />
           <ErrorProvider>
             <VoiceFocusProvider>
-              <MeetingProvider {...meetingConfig}>
-                <NavigationProvider>
-                  <Switch>
-                    <Route exact path={routes.HOME} component={Home} />
-                    <Route path={routes.DEVICE}>
-                      <NoMeetingRedirect>
-                        <DeviceSetup />
-                      </NoMeetingRedirect>
-                    </Route>
-                    <Route path={routes.MEETING}>
-                      <NoMeetingRedirect>
-                        <MeetingModeSelector />
-                      </NoMeetingRedirect>
-                    </Route>
-                  </Switch>
-                </NavigationProvider>
-                <MeetingEventObserver />
-              </MeetingProvider>
+              <MeetingView />
             </VoiceFocusProvider>
           </ErrorProvider>
         </NotificationProvider>
@@ -56,6 +41,44 @@ const App: FC = () => (
     </AppStateProvider>
   </Router>
 );
+
+const MeetingView: React.FC = () => {
+  const { addVoiceFocus } = useVoiceFocus();
+  const { meetingMode } = useAppState();
+  const [isVoiceFocusChecked, setIsVoiceFocusChecked] = useState(false);
+
+  const reselection = (device: Device): Promise<Device | VoiceFocusTransformDevice> => {
+    if (isVoiceFocusChecked) {
+      return addVoiceFocus(device);
+    }
+    return Promise.resolve(device);
+  };
+
+  const toggleVoiceFocus = () => {
+    setIsVoiceFocusChecked(current => !current);
+  }
+
+  return (
+    <MeetingProvider reselection={reselection} {...meetingConfig}>
+      <NavigationProvider>
+        <Switch>
+          <Route exact path={routes.HOME} component={Home}/>
+          <Route path={routes.DEVICE}>
+            <NoMeetingRedirect>
+              <DeviceSetup />
+            </NoMeetingRedirect>
+          </Route>
+          <Route path={routes.MEETING}>
+            <NoMeetingRedirect>
+              <Meeting mode={meetingMode} toggleVoiceFocus={toggleVoiceFocus}/>
+            </NoMeetingRedirect>
+          </Route>
+        </Switch>
+      </NavigationProvider>
+      <MeetingEventObserver />
+    </MeetingProvider>
+  )
+}
 
 const Theme: React.FC = ({ children }) => {
   const { theme } = useAppState();
@@ -65,14 +88,6 @@ const Theme: React.FC = ({ children }) => {
       <GlobalStyles />
       {children}
     </ThemeProvider>
-  );
-};
-
-const MeetingModeSelector: React.FC = () => {
-  const { meetingMode } = useAppState();
-
-  return (
-    <Meeting mode={meetingMode} />
   );
 };
 

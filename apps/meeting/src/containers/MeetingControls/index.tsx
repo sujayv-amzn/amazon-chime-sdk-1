@@ -17,7 +17,7 @@ import EndMeetingControl from '../EndMeetingControl';
 import { useNavigation } from '../../providers/NavigationProvider';
 import { StyledControls } from './Styled';
 
-const MeetingControls = () => {
+const MeetingControls = (props: { toggleVoiceFocus: () => void }) => {
   const { toggleNavbar, closeRoster, showRoster } = useNavigation();
   const { isUserActive } = useUserActivityState();
 
@@ -42,7 +42,7 @@ const MeetingControls = () => {
           onClick={handleToggle}
           label="Menu"
         />
-        <AudioInputVFControl />
+        <AudioInputVFControl toggleVoiceFocus={props.toggleVoiceFocus}/>
         <VideoInputControl />
         <ContentShareControl />
         <AudioOutputControl />

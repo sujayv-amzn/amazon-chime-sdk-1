@@ -16,7 +16,7 @@ import useMeetingEndRedirect from '../../hooks/useMeetingEndRedirect';
 import DynamicMeetingControls from '../../containers/DynamicMeetingControls';
 import { MeetingMode } from '../../types';
 
-const MeetingView = (props: { mode: MeetingMode, }) => {
+const MeetingView = (props: { mode: MeetingMode, toggleVoiceFocus: () => void }) => {
   useMeetingEndRedirect();
   const { showNavbar, showRoster } = useNavigation();
 
@@ -30,7 +30,7 @@ const MeetingView = (props: { mode: MeetingMode, }) => {
           />
           {props.mode === MeetingMode.Spectator ?
             <DynamicMeetingControls /> :
-            <MeetingControls />
+            <MeetingControls toggleVoiceFocus={props.toggleVoiceFocus}/>
           }
         </StyledContent>
         <NavigationControl />
