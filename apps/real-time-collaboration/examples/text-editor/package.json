@@ -32,7 +32,7 @@
     "css-loader": "^5.2.4",
     "eslint": "^7.22.0",
     "html-webpack-plugin": "^5.3.1",
-    "npm": "^7.11.0",
+    "npm": "^8.11.0",
     "rimraf": "^3.0.2",
     "style-loader": "^2.0.0",
     "ts-loader": "^9.0.2",
